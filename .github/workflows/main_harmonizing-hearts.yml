@@ -67,3 +67,4 @@ jobs:
           app-name: 'harmonizing-hearts'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2D2F897A25B6427A8E218F24B011D28B }}
+          startup-command: 'python dashboard.py'
