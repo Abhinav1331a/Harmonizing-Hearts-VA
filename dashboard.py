@@ -36,8 +36,8 @@ from plotly.subplots import make_subplots
 # ## Exploratory Data Analysis
 
 # %%
-spotify_data = pd.read_csv('Project/spotify_data.csv')
-genre_data = pd.read_csv('Project/train.csv')
+spotify_data = pd.read_csv('spotify_data.csv')
+genre_data = pd.read_csv('train.csv')
 
 # %%
 # spotify_data.head()

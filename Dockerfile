@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r req.txt
 EXPOSE 8050
 
 # Run app.py when the container launches
-CMD ["gunicorn", "--workers", "3", "--timeout", "1000", "--bind", "0.0.0.0:8050", "dashboard:app"]
+CMD ["python3", "-m" , "flask", "--app", "dashboard.py", "run", "--host=0.0.0.0"]
