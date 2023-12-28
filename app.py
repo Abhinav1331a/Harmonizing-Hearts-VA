@@ -1292,7 +1292,7 @@ def render_page_content(pathname):
 
 # %%
 if __name__ == '__main__':
-    app.run(debug=True, dev_tools_hot_reload=True)
+    app.run(debug=True, dev_tools_hot_reload=True, host = "0.0.0.0", port=8050)
 
 # %% [markdown]
 # <div class="alert alert-block alert-warning">
