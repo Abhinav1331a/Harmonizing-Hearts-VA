@@ -13,5 +13,5 @@ RUN pip install --no-cache-dir -r req.txt
 # Make port 8050 available to the world outside this container
 EXPOSE 8050
 
-# Run app.py when the container launches
-CMD ["python3", "-m" , "flask", "--app", "dashboard.py", "run", "--host=0.0.0.0"]
+# Run dashboard.py when the container launches
+CMD ["python3", "dashboard.py"]
