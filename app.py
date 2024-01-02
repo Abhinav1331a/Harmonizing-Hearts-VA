@@ -1,4 +1,4 @@
-# %%
+
 from collections import Counter
 import os
 import plotly.express as px
@@ -32,50 +32,12 @@ from keras.optimizers import Adam
 from keras.models import model_from_json
 from plotly.subplots import make_subplots
 
-# %% [markdown]
-# ## Exploratory Data Analysis
-
-# %%
 spotify_data = pd.read_csv('spotify_data.csv')
 genre_data = pd.read_csv('train.csv')
 
-# %%
-# spotify_data.head()
 
-# # %%
-# genre_data.head()
-
-# # %%
-# print('\x1b[1;31m'+'Total Records in Spotify Dataset :'+'\x1b[0m', len(spotify_data))
-# print('\x1b[1;31m'+'Duplicate Records in Spotify Dataset :'+'\x1b[0m', len(spotify_data[spotify_data.duplicated()]))
-
-# # %%
-# print('\x1b[1;31m'+'Total Records in Genre Dataset :'+'\x1b[0m', len(genre_data))
-# print('\x1b[1;31m'+'Duplicate Records in Genre Dataset :'+'\x1b[0m', len(genre_data[genre_data.duplicated()]))
-# genre_data = genre_data.drop_duplicates()
-# print('\x1b[1;31m'+'Total Records after dropping duplicates :'+'\x1b[0m', len(genre_data))
-
-# # %%
-# spotify_data.describe()
-
-# # %%
-# genre_data.describe()
-
-# %%
 labels = ["Rock", "Indie", "Alt", "Pop", "Metal", "HipHop", "Alt_Music", "Blues", "Acoustic/Folk", "Instrumental", "Country"]
- 
-# class_distribution = genre_data['Class'].value_counts().sort_values(ascending=False)
- 
-# # Create a dictionary to map class numbers to labels
-# label_dict = {i: label for i, label in enumerate(labels)}
- 
-# # Replace class numbers with labels
-# class_distribution.index = class_distribution.index.map(label_dict)
- 
-# fig = px.bar(class_distribution, x=class_distribution.index, y=class_distribution.values, labels={'x':'Class', 'y':'Count'}, title='Distribution of Each Class')
-# fig.show()
 
-# %%
 def mapper(col):
     coded_dict = dict()
     cter = 1
@@ -89,23 +51,23 @@ def mapper(col):
         encoded.append(coded_dict[val])
     return encoded
 
-# %%
+
 def normalize(numerical_columns, df):
     min_max_scaler = preprocessing.MinMaxScaler()
     df.loc[:, numerical_columns] = min_max_scaler.fit_transform(df[numerical_columns])
     return df
 
-# %%
+
 artist_id = mapper('artistname')
 user_ids = mapper('user_id')
 
-# %%
+
 # Handle spotify dataset (Preprocessing) 
 spotify_data['artistname_encoded'] = artist_id
 spotify_data['user_id_encoded'] = user_ids
 features = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms', 'time_signature']
 
-# %%
+
 # Handle genre dataset (Preprocessing)
 genre_data.dropna(inplace=True)
 genre_data.drop(['Popularity', 'time_signature', 'duration_in min/ms'], axis='columns', inplace=True)
@@ -115,17 +77,17 @@ columns = ["danceability", "energy", "key", "loudness", "mode", "speechiness", "
             "liveness", "valence", "tempo"]
 genre_data = normalize(columns, genre_data)
 
-# %%
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
-# %%
+
 genre_identification_model = None
 genre_identification_preprocessor = None
 
-# %% [markdown]
+
 # ## Tempo & Valence Analysis
 
-# %%
+
 @app.callback(
     Output("tempo-valence-figure", "figure"),
     [
@@ -145,7 +107,7 @@ def tempo_valence_figure(user_id, playlist_name):
         fig = px.scatter(df, x="valence", y="tempo", color="valence")
     return fig
 
-# %%
+
 @app.callback(
     [
         Output('user-tempo-valence-analysis-playlist-dropdown', 'options'),
@@ -160,10 +122,10 @@ def update_tempo_valence_dropdown(user_id):
     options = [{'label': playlist, 'value': playlist} for playlist in df['playlistname'].unique()]
     return options, options[0]['value']
 
-# %% [markdown]
+
 # ## Song Duration Analysis
 
-# %%
+
 @app.callback(
     Output("song-duration-figure", "figure"),
     [
@@ -201,7 +163,7 @@ def song_duration_figure(user_id, playlist_name):
     )
     return fig
 
-# %%
+
 @app.callback(
     [
         Output('user-song-duration-playlist-dropdown', 'options'),
@@ -216,10 +178,10 @@ def update_song_duration_dropdown(user_id):
     options = [{'label': playlist, 'value': playlist} for playlist in df['playlistname'].unique()]
     return options, options[0]['value']   
 
-# %% [markdown]
+
 # ## Feature Distribution Plots
 
-# %%
+
 @app.callback(
     Output("feature-distribution-figure", "figure"),
     [
@@ -234,10 +196,10 @@ def feature_distribution_figure(graph_type, feature):
         fig = px.histogram(spotify_data, x=feature.lower(), nbins=20)
     return fig
 
-# %% [markdown]
+
 # ## Feature Correlation Heatmap
 
-# %%
+
 @app.callback(
     Output("feature-correlation-heatmap-figure", "figure"),
     [
@@ -252,10 +214,10 @@ def create_heatmap(_):
     heatmap.update_xaxes(side="top")
     return heatmap
 
-# %% [markdown]
+
 # ## User Song Preferences Analysis
 
-# %%
+
 @app.callback(
     Output("user-song-preference-analysis-figure", "figure"),
     [
@@ -300,7 +262,7 @@ def create_radar_chart(user_id, radio_value, playlist_name=None):
     fig.update_traces(fill='toself')
     return fig
 
-# %%
+
 @app.callback(
     [
         Output('user-song-preference-analysis-playlist-dropdown', 'options'),
@@ -319,10 +281,10 @@ def update_dropdown_song_preference(user_id, radio_value):
     else:
         return [{'label':'default', 'value':'default', 'disabled':True}], 'default'
 
-# %% [markdown]
+
 # ## Similar User Matching
 
-# %%
+
 def create_user_artist_matrix(spotify_data):
     spotify_data['interact'] = 1
     user_artist = spotify_data.groupby(['user_id_encoded', 'artistname_encoded'])['interact'].max().unstack().fillna(0).astype('int')
@@ -465,7 +427,7 @@ def metrics_thresholds_graph_collaborative(user_id, user_artist):
     
     return fig
 
-# %%
+
 @app.callback(
     [
         Output('similar-user-matching-content-based-slider-div', 'children'),
@@ -488,7 +450,7 @@ def update_dropdown_content_based(user_id, radio_value):
     else:
         return div, {'display': 'none'}
 
-# %%
+
 @app.callback(
     Output('similar-user-matching-collaborative-slider', 'max'),
     Input('similar-user-matching-dropdown', 'value')
@@ -596,7 +558,7 @@ def metrics_thresholds_graph_content_based(user_id):
 
     return fig
 
-# %%
+
 @app.callback(
     [
         Output("similar-user-matching-figure1", "figure"),
@@ -640,10 +602,10 @@ def similar_user_matching(user_id, radio_value, collaborative_threshold, content
     )
     return fig1, fig2, table
 
-# %% [markdown]
+
 # ## Song Clustering & Exploration
 
-# %%
+
 @app.callback(
     Output('song-clustering-figure', 'figure'),
     Input('song-clustering-features-dropdown', 'value'),
@@ -686,10 +648,10 @@ def song_clustering_exploration(features, clusters):
 
     return fig
 
-# %% [markdown]
+
 # ## Genre Identification
 
-# %%
+
 @app.callback(
     Output('genre-identification-figure1', 'figure'),
     Output('genre-identification-figure2', 'figure'),
@@ -776,7 +738,7 @@ def train_and_evaluate_model(alpha):
 
     return evaluation_fig1, evaluation_fig2
 
-# %%
+
 # New callback to update the store whenever genre_identification_model is updated
 @app.callback(
     Output('genre-identification-store', 'data'),
@@ -842,10 +804,10 @@ def identify_genre(model_json, user_id):
     
     return fig3, fig4, most_frequent_genre
 
-# %% [markdown]
+
 # ## Dashboard User Interface
 
-# %%
+
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -884,7 +846,7 @@ sidebar = html.Div(
 )
 
 
-# %%
+
 content = html.Div(id="page-content", style=CONTENT_STYLE)
 
 app.layout = html.Div([
@@ -898,7 +860,7 @@ app.layout = html.Div([
     ),
 ])
 
-# %%
+
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":
@@ -1290,54 +1252,6 @@ def render_page_content(pathname):
         className="p-3 bg-light rounded-3",
     )
 
-# %%
+
 if __name__ == '__main__':
     app.run(debug=True, dev_tools_hot_reload=True, host = "0.0.0.0", port=8050)
-
-# %% [markdown]
-# <div class="alert alert-block alert-warning">
-# <h4>Note:</h4>
-# <p>As this is a dashboard application, the Jupyter Notebook screenshot won't encompass all the features. To interact with the application fully, it needs to be run on a local server. Therefore, below, we've included screenshots of the application for reference.</p>
-# </div>
-
-# %% [markdown]
-# ![image.png](attachment:54624a71-e531-42ec-af54-00fbaa5a7df2.png)
-
-# %% [markdown]
-# ![image.png](attachment:f0a0aab7-298d-4995-ad3d-b932cecd283a.png)
-
-# %% [markdown]
-# ![image.png](attachment:a20868d4-67a7-48c7-960b-c617006fba33.png)
-
-# %% [markdown]
-# ![image.png](attachment:ffe4034c-df54-46a2-a499-c2dd9d238e4a.png)
-
-# %% [markdown]
-# ![image.png](attachment:01574597-eb9f-468d-a224-fbe5dd466c8e.png)
-
-# %% [markdown]
-# ## References :
-# 
-# [1] Acharya, A. (2023). Spotify Dataset [Data set].<br>
-# [2] Larxel. (2021). Spotify Playlists [Data set].<br>
-# [3] SongRecommendation-collaborativeFiltering-cluster. (2022, December 14). Kaggle.com. [Online]. Available: https://www.kaggle.com/code/shriyutha/songrecommendation-collaborativefiltering-cluster<br>
-# [4] Recommendation systems • ranking/scoring. (n.d.). Aman.ai. [Online]. Available: https://aman.ai/recsys/ranking/<br>
-# [5] Aher, P. (2023, August 9). Evaluation metrics for recommendation systems — an overview. Towards Data Science. [Online]. Available: https://towardsdatascience.com/evaluation-metrics-for-recommendation-systems-an-overview-71290690ecba<br>
-# [6] Reddit - dive into anything. (n.d.). Reddit.com. [Online]. Available: https://www.reddit.com/r/learnmachinelearning/comments/16notit/collaborative_filtering_jaccard_similarity_vs/<br>
-# [7] Halilovic, I. (2021, July 30). Markdown for Jupyter notebooks cheatsheet - Inge Halilovic - Medium. Medium. [Online]. Available: https://ingeh.medium.com/markdown-for-jupyter-notebooks-cheatsheet-386c05aeebed<br>
-# [8] Zach. (2023). How to create a distribution plot in Matplotlib. Statology. [Online]. Available: https://www.statology.org/matplotlib-distribution-plot/<br>
-# [9] Seaborn.Heatmap — seaborn 0.13.0 documentation. (n.d.). Pydata.org. [Online]. Available: https://seaborn.pydata.org/generated/seaborn.heatmap.html<br>
-# [10] Sharma, P. (2019, August 19). The ultimate guide to K-means clustering: Definition, methods and applications. Analytics Vidhya. https://www.analyticsvidhya.com/blog/2019/08/comprehensive-guide-k-means-clustering/ <br>
-# [11] Stewart, M. (2019, June 17). Introduction to neural networks. Towards Data Science. https://towardsdatascience.com/simple-introduction-to-neural-networks-ac1d7c3d7a2c <br>
-# [12] Column transformer with mixed types. (n.d.). Scikit-Learn. Retrieved December 19, 2023, from https://scikit-learn.org/stable/auto_examples/compose/plot_column_transformer_mixed_types.html<br>
-# [13] Plotly: Low-code data app development. (n.d.). Plotly.com. Retrieved December 19, 2023, from https://plotly.com/<br>
-# [14] Selecting the number of clusters with silhouette analysis on KMeans clustering. (n.d.). Scikit-Learn. Retrieved December 19, 2023, from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html<br>
-# [15] Sklearn.Preprocessing.OneHotEncoder. (n.d.). Scikit-Learn. Retrieved December 19, 2023, from https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html<br>
-# [16] Sklearn.decomposition.PCA. (n.d.). Scikit-Learn. Retrieved December 19, 2023, from https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html<br>
-# [17] TensorFlow. (n.d.). TensorFlow. Retrieved December 19, 2023, from https://www.tensorflow.org/<br>
-# [18] Dash bootstrap components. (n.d.). Faculty.Ai. Retrieved December 19, 2023, from https://dash-bootstrap-components.opensource.faculty.ai/<br>
-
-# %%
-
-
-
